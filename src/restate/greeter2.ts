@@ -17,7 +17,13 @@ export type InsuranceClaim = z.infer<typeof InsuranceClaimSchema>;
 export const claimApprovalAgentWithHumanApproval = restate.workflow({
   name: "ClaimApprovalAgent",
   handlers: {
-    run: async (ctx: restate.WorkflowContext, { amount }: { amount: number }) => {
+    run: async (ctx: restate.WorkflowContext, { customerId, amount} : { customerId: string; amount: number }) => {
+      
+      // enrich with database data
+      const customerPolicy = await ctx.run("fetch customer policy from DB", () =>
+        retrieveCustomerPolicy(customerId),
+      );
+      
       const model = wrapLanguageModel({
         model: openai("gpt-4o"),
         middleware: durableCalls(ctx),
@@ -29,7 +35,7 @@ export const claimApprovalAgentWithHumanApproval = restate.workflow({
           "You are an insurance claim evaluation agent. Use these rules: " +
           "* if the amount is more than 1000, ask for human approval, " +
           "* if the amount is less than 1000, decide by yourself",
-        prompt: `Please evaluate the following insurance claim: ${amount}.`,
+        prompt: `Evaluate the claim for ${amount}\n\nCustomer Policy Info: ${JSON.stringify(customerPolicy)}`,
         tools: {
           humanApproval: tool({
             description: "Ask for human approval for high-value claims.",
@@ -59,8 +65,21 @@ export const claimApprovalAgentWithHumanApproval = restate.workflow({
   },
 });
 
+
 // UTILS
 
-export function notifyHumanReviewer(message: InsuranceClaim, key: string) {
+export function notifyHumanReviewer(
+  message: InsuranceClaim,
+  responseId: string = "",
+) {
   console.log(`>>> ${message} \n`);
+}
+
+export function retrieveCustomerPolicy(customerId: string) {
+  console.log(`Retrieving policy info for customer ${customerId}...`);
+  return {
+    policyNumber: "POL123456",
+    coverage: "Full",
+    validTill: "2025-12-31",
+  };
 }
