@@ -26,16 +26,16 @@ export const claimApprovalAgentWithHumanApproval = restate.workflow({
       const { text } = await generateText({
         model,
         system:
-          "You are an insurance claim evaluation agent. Use these rules: " +
-          "* if the amount is more than 1000, ask for human approval, " +
-          "* if the amount is less than 1000, decide by yourself",
+          "You are an insurance claim evaluation agent. Use these rules:\n " +
+          "* if the amount is more than 1000, ask for human approval,\n" +
+          "* if the amount is less than 1000, decide by yourself\n" +
+          "* you only need the amount and no further details about the claim",
         prompt: `Please evaluate the following insurance claim: ${amount}.`,
         tools: {
           humanApproval: tool({
             description: "Ask for human approval for high-value claims.",
             inputSchema: InsuranceClaimSchema,
             execute: async (claim: InsuranceClaim) => {
-
               await ctx.run("request human review", () =>
                 notifyHumanReviewer(claim, ctx.key)
               );
