@@ -255,6 +255,12 @@ export default function CodingAgentUI() {
     setInput('')
     setCurrentPlan([]);
     
+    let client = messagesEventSourceRef.current;
+    if (client) {
+      client.close();
+      messagesEventSourceRef.current = null;
+    }
+    
     try {
       const response = await fetch(`/api/message`, {
         method: "POST",

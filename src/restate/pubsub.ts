@@ -74,6 +74,8 @@ export const subscriberClient = async ({
   onError
 }: CreateSubscriberClient): Promise<SubscriberClient> => {
   const ws = new WebSocket(`wss://${host}/ws/subscribe/${topic}`);
+    
+  let closed: boolean = false;
 
   let resolve: (value: void | PromiseLike<void>) => void,
     reject: (arg0: Error) => void;
@@ -121,8 +123,8 @@ export const subscriberClient = async ({
       return;
     }
 
-    console.log("Received:", data);
     const message = data as StreamUIMessages;
+    if (closed) return;
     onMessage(message);
   };
 
@@ -130,6 +132,7 @@ export const subscriberClient = async ({
 
   return {
     close: () => {
+      closed = true;
       ws.close();
     },
   };
