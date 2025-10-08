@@ -15,6 +15,7 @@ export type PublisherClient = {
 
 export type CreateSubscriberClient = {
   topic: string;
+  host: string;
   onMessage: (message: StreamUIMessages) => void;
   onOpen?: () => void;
   onError?: (error: Error) => void;
@@ -68,10 +69,11 @@ export const publisherClient = async ({ topic }: CreatePublisherClient): Promise
 
 export const subscriberClient = async ({
   topic,
+  host,
   onMessage,
   onError
 }: CreateSubscriberClient): Promise<SubscriberClient> => {
-  const ws = new WebSocket(`ws://${HOST}/ws/subscribe/${topic}`);
+  const ws = new WebSocket(`wss://${host}/ws/subscribe/${topic}`);
 
   let resolve: (value: void | PromiseLike<void>) => void,
     reject: (arg0: Error) => void;

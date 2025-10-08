@@ -203,6 +203,7 @@ export default function CodingAgentUI() {
     
     client = await subscriberClient({
       topic: currentTaskId,
+      host: "denoapubsub-production.up.railway.app", // TODO: Move to env
       onMessage,
       onError: (error) => {
         console.error("error:", error);
@@ -319,11 +320,12 @@ export default function CodingAgentUI() {
       title: "Execution Stopped",
       description: "The coding agent execution has been stopped.",
     })
-    fetch(`http://localhost:8080/agent/${AGENT_ID}/cancelTask`, {
+    fetch(`/api/cancel`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
+      body: JSON.stringify({ agentId: AGENT_ID }),
     }).catch((error) => {
       console.error("Error stopping execution:", error);
       toast({
