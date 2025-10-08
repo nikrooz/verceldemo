@@ -9,7 +9,20 @@ import { Progress } from "@/components/ui/progress"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/hooks/use-toast"
-import { Bot, User, Play, Square, CheckCircle, Clock, AlertCircle, Code, Send, FileCode, Wifi, WifiOff, Download } from 'lucide-react'
+import {
+  Bot,
+  User,
+  Play,
+  Square,
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  Code,
+  Send,
+  FileCode,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
 
 import type { StreamUIMessages } from "@/restate/types"
 import { subscriberClient, SubscriberClient } from "@/restate/pubsub"
@@ -242,18 +255,14 @@ export default function CodingAgentUI() {
     setCurrentPlan([]);
     
     try {
-      // Submit to REST API
-      const response = await fetch(
-        `http://localhost:8080/agent/${AGENT_ID}/newMessage`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(currentInput),
-          signal: abortController.signal,
-        }
-      );
+      const response = await fetch(`/api/message`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message: currentInput, agentId: AGENT_ID }),
+        signal: abortController.signal,
+      });
       
       if (!response.ok) {
         throw new Error('Failed to submit prompt')
