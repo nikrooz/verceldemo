@@ -98,8 +98,31 @@ export const subscriberClient = async ({
       reject(new Error('WebSocket closed unexpectedly'));
     }
   };
-  ws.onmessage = (event) => {
-    const message = JSON.parse(event.data) as StreamUIMessages;
+  ws.onmessage = async (event) => {
+    let data;
+    if (event.data instanceof Blob) {
+      const text = await event.data.text();
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        console.error("Failed to parse JSON:", text);
+        return;
+      }
+    } else if (typeof event.data === "string") {
+      // Handle string messages directly
+      try {
+        data = JSON.parse(event.data);
+      } catch (err) {
+        console.error("Failed to parse JSON:", event.data);
+        return;
+      }
+    } else {
+      console.warn("Received unexpected message type:", typeof event.data);
+      return;
+    }
+
+    console.log("Received:", data);
+    const message = data as StreamUIMessages;
     onMessage(message);
   };
 
